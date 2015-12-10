@@ -26,10 +26,10 @@ create_matrix(Rows, Columns, Matrix) :-
 	create_matrix(NewRows, Columns, NewRow),
 	append([InsideRow], NewRow, Matrix).
 
-apply_restriction_by_row([]).
-apply_restriction_by_row([H|T]) :-
-	domain(H, 1, 8),
-	apply_restriction_by_row(T).
+apply_restriction_by_row([], _).
+apply_restriction_by_row([H|T], Max) :-
+	domain(H, 1, Max),
+	apply_restriction_by_row(T, Max).
 
 apply_restriction_by_column([], _).
 apply_restriction_by_column([H|T], Sum) :-
@@ -44,9 +44,10 @@ generate_random_solution(Rows, Columns, Sum) :-
 
 % Starting function
 main(Rows, Columns, Sum) :-
+	Max is Sum - (Rows - 1),
 	create_matrix(Rows, Columns, Matrix),
 	transpose(Matrix, TransposedMatrix),
-	apply_restriction_by_row(Matrix),
+	apply_restriction_by_row(Matrix, Max),
 	apply_restriction_by_column(TransposedMatrix, Sum),
 	generate_random_solution(Rows, Columns, Sum),
 	append(Matrix, List),
