@@ -54,11 +54,12 @@ main(Rows, Columns, Sum) :-
 	reset_timer,
 	labeling([], List),
 	randomSolution(V),
+	(Sum = Rows -> display_board(Matrix);
 	(V = 0 -> display_board(Matrix);
 	(V \= 0 -> randomSolution(N),
 			   N1 is N - 1,
 			   retract(randomSolution(_)),
 			   assert(randomSolution(N1)),
-			   fail)),
+			   fail))),
 	print_time,
 	fd_statistics.
