@@ -29,9 +29,30 @@ display_inner_wheels([H|T]) :-
 	print(H), nl,
 	display_inner_wheels(T).
 
+display_all_wheels([]).
+display_all_wheels([H|T]) :-
+	print(H), nl,
+	display_all_wheels(T).
+
 % Logic
+restrict_equal_wheel(Wheel, OuterWheel, Same, Same) :-
+	nth0(Same, Wheel, WheelElem),
+	nth0(Same, OuterWheel, OuterWheelElem),
+	OuterWheelElem #= WheelElem.
+
+restrict_equal_wheel(Wheel, OuterWheel, Index, Size) :-
+	nth0(Index, Wheel, WheelElem),
+	nth0(Index, OuterWheel, OuterWheelElem),
+	OuterWheelElem #= WheelElem,
+	NextIndex is Index + 1,
+	restrict_equal_wheel(Wheel, OuterWheel, NextIndex, Size).
+
 get_outer_wheel(OuterWheel) :-
-	outerWheel(OuterWheel).
+	outerWheel(Wheel),
+	length(Wheel, Size),
+	length(OuterWheel, Size),
+	S is Size - 2,
+	restrict_equal_wheel(Wheel, OuterWheel, 0, S).
 
 get_existing_wheels(ExistingWheels) :-
 	findall(List, innerWheel(List), ExistingWheels).
@@ -90,6 +111,16 @@ restrict_sum(InnerWheelsList) :-
 	length(List, Size),
 	foreach(between(1, Size, Index), restrict_sum_column(InnerWheelsList, Index)).
 
+restrict_sum_column(OuterWheel, InnerWheelsList, Index) :-
+	nth1(Index, OuterWheel, First),
+	create_list_by_index(InnerWheelsList, Index, NewList),
+	append([First], NewList, Column),
+	sum(Column, #=, 20).
+
+restrict_sum(OuterWheel, InnerWheelsList) :-
+	length(OuterWheel, Size),
+	foreach(between(1, Size, Index), restrict_sum_column(OuterWheel, InnerWheelsList, Index)).
+
 % Main function
 main :-
 	choose_difficulty(Input),
@@ -99,9 +130,10 @@ main :-
 	restrict_valid_lists(ExistingWheels, InnerWheelsList),
 	(Input = e -> restrict_sum(InnerWheelsList),
 				  label_inner_wheels(InnerWheelsList),
-				  display_inner_wheels(InnerWheelsList), !),
+				  display_inner_wheels(InnerWheelsList), !;
 	(Input = h -> get_outer_wheel(OuterWheel),
-	%			  restrict_sum(OuterWheel, InnerWheelsList),
-	%			  label_all_wheels(OuterWheel, InnerWheelsList),
-	%			  display_all_wheels(OuterWheel, InnerWheelsList), !),
+				  restrict_sum(OuterWheel, InnerWheelsList),
+				  label_inner_wheels(InnerWheelsList),
+				  append([OuterWheel], InnerWheelsList, AllWheelsList),
+				  display_all_wheels(AllWheelsList), !)),
 	write('The End!').
