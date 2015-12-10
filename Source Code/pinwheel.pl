@@ -30,6 +30,9 @@ display_inner_wheels([H|T]) :-
 	display_inner_wheels(T).
 
 % Logic
+get_outer_wheel(OuterWheel) :-
+	outerWheel(OuterWheel).
+
 get_existing_wheels(ExistingWheels) :-
 	findall(List, innerWheel(List), ExistingWheels).
 
@@ -41,7 +44,7 @@ create_wheel_list(WheelList) :-
 create_inner_wheels_list([], 0).
 create_inner_wheels_list(InnerWheelsList, N) :-
 	create_wheel_list(WheelList),
-	domain(WheelList, 1, 9),
+	domain(WheelList, 1, 8),
 	N1 is N - 1,
 	create_inner_wheels_list(NewWheelList, N1),
 	append([WheelList], NewWheelList, InnerWheelsList).
@@ -98,7 +101,7 @@ main :-
 				  label_inner_wheels(InnerWheelsList),
 				  display_inner_wheels(InnerWheelsList), !),
 	(Input = h -> get_outer_wheel(OuterWheel),
-				  restrict_sum(OuterWheel, InnerWheelsList),
-				  label_all_wheels(OuterWheel, InnerWheelsList),
-				  display_all_wheels(OuterWheel, InnerWheelsList), !),
+	%			  restrict_sum(OuterWheel, InnerWheelsList),
+	%			  label_all_wheels(OuterWheel, InnerWheelsList),
+	%			  display_all_wheels(OuterWheel, InnerWheelsList), !),
 	write('The End!').
