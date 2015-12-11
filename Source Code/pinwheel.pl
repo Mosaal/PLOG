@@ -8,7 +8,7 @@ smallMatrix([[4, 4, 4, 5, 5, 5, 6, 6, 6],
 			 [1, 2, 4, 4, 5, 6, 6, 7, 8]]).
 
 largeMatrix([[3, 3, 4, 4, 5, 5, 6, 7, 8],
-			 [4, 4, 4, 5, 5, 5, 6, 6, 6],
+			 [4, 5, 4, 5, 4, 5, 6, 6, 6],
 			 [2, 3, 4, 5, 5, 6, 7, 7, 8],
 			 [1, 2, 4, 4, 5, 6, 6, 7, 8]]).
 
@@ -78,6 +78,11 @@ apply_restriction([H|T], Sum) :-
 	sum(H, #=, Sum),
 	apply_restriction(T, Sum).
 
+order_matrix([], []).
+order_matrix([Row | Rest], [OrderedRow | OrderedRest]) :-
+	samsort(Row, OrderedRow),
+	order_matrix(Rest, OrderedRest).
+
 sort_matrix([], []).
 sort_matrix([Row | Rest], [SortedRow | SortedRest]) :-
 	length(Row, Size),
@@ -86,8 +91,9 @@ sort_matrix([Row | Rest], [SortedRow | SortedRest]) :-
 	sorting(SortedRow, Temp, Row),
 	sort_matrix(Rest, SortedRest).
 
-solve_puzzle(Input, Matrix, FinalMatrix) :-
-	sort_matrix(Matrix, FinalMatrix),
+restrictions(Input, Matrix, FinalMatrix) :-
+	order_matrix(Matrix, OrderedMatrix),
+	sort_matrix(OrderedMatrix, FinalMatrix),
 	transpose(FinalMatrix, TransposedMatrix),
 	(Input = e -> apply_restriction(TransposedMatrix, 15);
 	(Input = h -> apply_restriction(TransposedMatrix, 20))).
@@ -96,7 +102,7 @@ solve_puzzle(Input, Matrix, FinalMatrix) :-
 main :-
 	choose_difficulty(Input),
 	get_matrix(Input, Matrix),
-	solve_puzzle(Input, Matrix, FinalMatrix),
+	restrictions(Input, Matrix, FinalMatrix),
 	reset_timer,
 	label_matrix(FinalMatrix),
 	display_board(FinalMatrix),
