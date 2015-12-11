@@ -3,14 +3,14 @@
 :- use_module(library(samsort)).
 
 % Boards
-smallMatrix([[5, 5, 4, 6, 4, 6, 6, 4, 5],
-			 [7, 5, 7, 8, 4, 5, 3, 2, 6],
-			 [4, 8, 5, 6, 2, 1, 4, 6, 7]]).
+smallMatrix([[4, 4, 4, 5, 5, 5, 6, 6, 6],
+			 [2, 3, 4, 5, 5, 6, 7, 7, 8],
+			 [1, 2, 4, 4, 5, 6, 6, 7, 8]]).
 
-largeMatrix([[3, 3, 4, 5, 7, 4, 8, 6, 5],
-			 [5, 5, 4, 6, 4, 6, 6, 4, 5],
-			 [7, 5, 7, 8, 4, 5, 3, 2, 6],
-			 [4, 8, 5, 6, 2, 1, 4, 6, 7]]).
+largeMatrix([[3, 3, 4, 4, 5, 5, 6, 7, 8],
+			 [4, 4, 4, 5, 5, 5, 6, 6, 6],
+			 [2, 3, 4, 5, 5, 6, 7, 7, 8],
+			 [1, 2, 4, 4, 5, 6, 6, 7, 8]]).
 
 % Interface
 display_row([]).
@@ -45,6 +45,12 @@ choose_difficulty(Input) :-
 	valid_input(Input), !;
 	choose_difficulty(Input).
 
+try_again :-
+	write('Do you wish to try again? (y/n)'), nl,
+	read(Input),
+	(Input = y -> nl, fail;
+	(Input = n -> !)).
+
 reset_timer :- statistics(walltime, _).
 print_time :-
 	statistics(walltime, [_, T]),
@@ -72,11 +78,6 @@ apply_restriction([H|T], Sum) :-
 	sum(H, #=, Sum),
 	apply_restriction(T, Sum).
 
-order_matrix([], []).
-order_matrix([Row | Rest], [OrderedRow | OrderedRest]) :-
-	samsort(Row, OrderedRow),
-	order_matrix(Rest, OrderedRest).
-
 sort_matrix([], []).
 sort_matrix([Row | Rest], [SortedRow | SortedRest]) :-
 	length(Row, Size),
@@ -86,8 +87,7 @@ sort_matrix([Row | Rest], [SortedRow | SortedRest]) :-
 	sort_matrix(Rest, SortedRest).
 
 solve_puzzle(Input, Matrix, FinalMatrix) :-
-	order_matrix(Matrix, OrderedMatrix),
-	sort_matrix(OrderedMatrix, FinalMatrix),
+	sort_matrix(Matrix, FinalMatrix),
 	transpose(FinalMatrix, TransposedMatrix),
 	(Input = e -> apply_restriction(TransposedMatrix, 15);
 	(Input = h -> apply_restriction(TransposedMatrix, 20))).
@@ -97,6 +97,10 @@ main :-
 	choose_difficulty(Input),
 	get_matrix(Input, Matrix),
 	solve_puzzle(Input, Matrix, FinalMatrix),
+	reset_timer,
 	label_matrix(FinalMatrix),
 	display_board(FinalMatrix),
-	display_info(Input).
+	display_info(Input),
+	print_time,
+	fd_statistics, nl,
+	try_again.
